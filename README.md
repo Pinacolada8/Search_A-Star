@@ -1,106 +1,123 @@
-#### CFPB Open Source Project Template Instructions
+# Automaton Interpreter
 
-1. Create a new project.
-2. [Copy these files into the new project](#installation)
-3. Update the README, replacing the contents below as prescribed.
-4. Add any libraries, assets, or hard dependencies whose source code will be included
-   in the project's repository to the _Exceptions_ section in the [TERMS](TERMS.md).
-  - If no exceptions are needed, remove that section from TERMS.
-5. If working with an existing code base, answer the questions on the [open source checklist](opensource-checklist.md)
-6. Delete these instructions and everything up to the _Project Title_ from the README.
-7. Write some great software and tell people about it.
-
-> Keep the README fresh! It's the first thing people see and will make the initial impression.
-
-## Installation
-
-To install all of the template files, run the following script from the root of your project's directory:
-
-```
-bash -c "$(curl -s https://raw.githubusercontent.com/CFPB/development/master/open-source-template.sh)"
-```
-
-----
-
-# Project Title
-
-**Description**:  Put a meaningful, short, plain-language description of what
-this project is trying to accomplish and why it matters.
-Describe the problem(s) this project solves.
-Describe how this software can improve the lives of its audience.
-
-Other things to include:
-
-  - **Technology stack**: Indicate the technological nature of the software, including primary programming language(s) and whether the software is intended as standalone or as a module in a framework or other ecosystem.
-  - **Status**:  Alpha, Beta, 1.1, etc. It's OK to write a sentence, too. The goal is to let interested people know where this project is at. This is also a good place to link to the [CHANGELOG](CHANGELOG.md).
-  - **Links to production or demo instances**
-  - Describe what sets this apart from related-projects. Linking to another doc or page is OK if this can't be expressed in a sentence or two.
+**Description**:  Base code for creating automaton interpreters.
 
 
-**Screenshot**: If the software has visual components, place a screenshot after the description; e.g.,
-
-![](https://raw.githubusercontent.com/cfpb/open-source-project-template/master/screenshot.png)
-
+  - Developed in C# .Net Core 3.1
+  - Cross Platform (Windows, Linux, MacOS)
+  - **Status**:  Currently the project only contains code for a deterministic stack automaton.
 
 ## Dependencies
 
-Describe any dependencies that must be installed for this software to work.
-This includes programming languages, databases or other storage mechanisms, build tools, frameworks, and so forth.
-If specific versions of other software are required, or known not to work, call that out.
+  - .Net Core 3.1 [Download1](https://dotnet.microsoft.com/download) [Download2](https://github.com/dotnet/core/blob/master/release-notes/3.1/3.1.8/3.1.402-download.md)
 
 ## Installation
 
-Detailed instructions on how to install, configure, and get the project running.
-This should be frequently tested to ensure reliability. Alternatively, link to
-a separate [INSTALL](INSTALL.md) document.
+Download and install .Net Core 3.1 [.Net Core Install instructions](https://github.com/dotnet/core/blob/master/release-notes/3.1/3.1.8/3.1.8-install-instructions.md).
+You can use any IDE you feel confortable editing, but Visual Studio is preferred.
 
 ## Configuration
 
-If the software is configurable, describe it in detail, either here or in other documentation to which you link.
+The logging output can be configured setting the environment variable "AUTOMATON_LOG_PRESET" according to the following enum:
+````csharp
+    [Flags]
+    public enum LogConfigEnum
+    {
+        CONSOLE_DEFAULT = 0b0000_0001, // 1
+        CONSOLE_COLORED = 0b0000_0010, // 2
+        CONSOLE_ERRORS  = 0b0000_0100, // 4
+        CONSOLE_DEBUG   = 0b0000_1000, // 8
+        FILE            = 0b0001_0000, // 16
+
+        // ---
+        DEFAULT        = CONSOLE_DEFAULT,                                         // 5
+        IMPROVED       = CONSOLE_COLORED | CONSOLE_ERRORS                 | FILE, // 22
+        DEBUG_IMPROVED = CONSOLE_COLORED | CONSOLE_ERRORS | CONSOLE_DEBUG | FILE  // 30
+    }
+````
+Example: 
+
+- Linux:
+````bash
+export AUTOMATON_LOG_PRESET=6
+````
+
+- Windows:
+````batch
+setX AUTOMATON_LOG_PRESET 22
+````
 
 ## Usage
-
-Show users how to use the software.
-Be specific.
-Use appropriate formatting when showing code snippets.
+Execution:
+````bash
+$ ./apd exemplo.json
+````
+Input file example:
+````json
+{
+  "ap": [
+    [ "i", "d" ],
+    [ "0", "1" ],
+    [ "Z", "U", "F" ],
+    [
+      [ "i", "0", "#", "d", "ZF" ],
+      [ "i", "1", "#", "d", "UF" ],
+      [ "d", "0", "Z", "d", "ZZ" ],
+      [ "d", "0", "U", "d", "#" ],
+      [ "d", "1", "U", "d", "UU" ],
+      [ "d", "1", "Z", "d", "#" ],
+      [ "d", "#", "F", "i", "#" ]
+    ],
+    "i",
+    [ "i" ]
+  ]
+}
+````
 
 ## How to test the software
 
-If the software includes automated tests, detail how to run those tests.
+For compiling the code use the following commands:
+- Linux:
+  - option 1:
+    ````bash
+    $ dotnet publish App/App.csproj /p:PublishProfile=App/Properties/PublishProfiles/LinuxX64.pubxml
+    ````
+  - option 2:
+    ````bash
+    $ dotnet publish App/App.csproj -c Release -r linux-x64 /p:PublishSingleFile=true --output ./bin/LinuxX64
+    ````
 
-## Known issues
+- Windows:
+  - option 1:
+    ````batch
+    > dotnet publish App/App.csproj /p:PublishProfile=App/Properties/PublishProfiles/WinX64.pubxml
+    ````
+  - option 2:
+    ````batch
+    > dotnet publish App/App.csproj -c Release -r win-x64 /p:PublishSingleFile=true --output ./bin/WindowsX64
+    ````
 
-Document any known significant shortcomings with the software.
+- Windows X86:
+  - option 1:
+    ````batch
+    > dotnet publish App/App.csproj /p:PublishProfile=App/Properties/PublishProfiles/WinX86.pubxml
+    ````
 
-## Getting help
-
-Instruct users how to get help with this software; this might include links to an issue tracker, wiki, mailing list, etc.
-
-**Example**
-
-If you have questions, concerns, bug reports, etc, please file an issue in this repository's Issue Tracker.
-
-## Getting involved
-
-This section should detail why people should get involved and describe key areas you are
-currently focusing on; e.g., trying to get feedback on features, fixing certain bugs, building
-important pieces, etc.
-
-General instructions on _how_ to contribute should be stated with a link to [CONTRIBUTING](CONTRIBUTING.md).
-
+For custom compilation settings search [.Net Build Instructions](https://docs.microsoft.com/pt-br/dotnet/core/tools/dotnet-build)
 
 ----
 
-## Open source licensing info
-1. [TERMS](TERMS.md)
-2. [LICENSE](LICENSE)
-3. [CFPB Source Code Policy](https://github.com/cfpb/source-code-policy/)
+## Contributors
 
+- Matheus Dutra Cerbino
+
+## ISSUES
+
+If you have questions, concerns, bug reports, etc, please file an issue in this repository's Issue Tracker.
 
 ----
 
 ## Credits and references
 
-1. Projects that inspired you
-2. Related projects
-3. Books, papers, talks, or other sources that have meaningful impact or influence on this project
+1. Project made as a homework for "LINGUAGENS FORMAIS E AUTÔMATOS" class of CEFET-MG college.
+2. Project GitHub [GitHub](https://github.com/Pinacolada8/AutomatonInterpreter)
