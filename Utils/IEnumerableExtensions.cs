@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IA_AEstrela.Utils
+{
+    public static class IEnumerableExtensions
+    {
+        public static List<T>? AsList<T>(this IEnumerable<T> source)
+        {
+            return source is null or List<T> ? (List<T>?)source : source.ToList();
+        }
+
+        public static IList<T>? AsIList<T>(this IEnumerable<T> source)
+        {
+            return source is null or IList<T> ? (IList<T>?)source : source.ToList();
+        }
+
+        public static T[]? AsArray<T>(this IEnumerable<T> source)
+        {
+            return source is null or T[] ? (T[]?)source : source.ToArray();
+        }
+
+        public static T[] ToArray<T>(this IEnumerable<T> source, int capacity)
+        {
+            if(source == null)
+                throw new ArgumentNullException(nameof(source));
+            if(capacity < 0)
+                throw new ArgumentOutOfRangeException(nameof(capacity), "Non-negative number required.");
+
+            var array = new T[capacity];
+
+            var i = 0;
+            foreach(var item in source)
+            {
+                if(i >= capacity)
+                    throw new ArgumentOutOfRangeException(nameof(capacity), "Source.Count() cannot be greater than capacity.");
+
+                array[i++] = item;
+            }
+
+            if(i < capacity)
+                array = array[..i];
+
+            return array;
+        }
+
+        public static bool HasValues<T>(this IEnumerable<T> source)
+        {
+            try
+            {
+                return source != null && source.Any();
+            }
+            catch(Exception)
+            {
+                return false;
+            }
+        }
+    }
+}
