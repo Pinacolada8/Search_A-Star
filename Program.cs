@@ -6,84 +6,30 @@ using IA_AEstrela.Utils;
 
 Console.WriteLine("Execution Started");
 
-var graphEdges = GraphReader.ReadEdges("files/Grafo.txt").AsList() ?? new();
-var graphHeuristics = GraphReader.ReadHeuristics("files/Heuristica.txt").AsList() ?? new();
+const string initialVertex = "Arad";
+const string destinationVertex = "Bucareste";
 
 
-var dictOriginCity = graphEdges.ToLookup(x => x.VertexFrom);
+var graphEdges = GraphReader.ReadEdges("files/Grafo.txt").AsList() ?? new List<GraphEdge>();
+var graphHeuristics = GraphReader.ReadHeuristics("files/Heuristica.txt").AsList() ?? new List<GraphHeuristic>();
 
-const string destinationCity = "Bucareste";
-var initialCity = "Arad";
+// ReSharper disable once UseObjectOrCollectionInitializer
+var graph = new Graph(graphEdges);
 
-var routes = new List<GraphRoute>();
-routes.Add(new GraphRoute()
+// Setting the G(x) and H(x) functions to be used in the search
+graph.Gx = (edge, graphInternal) => edge.Cost;
+graph.Hx = (edge, graphInternal) => graphHeuristics.Find(x => x.VertexFrom.Equals(edge.VertexTo) &&
+                                                              x.VertexTo.Equals(destinationVertex))?.Cost 
+                                    ?? int.MaxValue;
+
+
+var resultRoute = graph.SearchForRoute(initialVertex, destinationVertex);
+
+if(resultRoute is not null)
 {
-    CurrentVertex = initialCity,
-    AccumulatedCost = 0,
-    PossibleEdges = dictOriginCity.Contains(initialCity)
-        ? dictOriginCity[initialCity].ToList()
-        : new List<GraphEdge>()
-});
-
-while(true)
-{
-    var availablePaths = routes.SelectMany(x => x.PossibleEdges
-        .Select(conn => new
-        {
-            path = x,
-            nextConn = conn,
-            heuristics = graphHeuristics.Find(h => h.VertexTo == conn.VertexTo),
-        }))
-        .Select(x => new
-        {
-            path = x.path,
-            x.nextConn,
-            nextCity = x.nextConn.VertexFrom,
-            Cost = x.path.AccumulatedCost + x.nextConn.Cost + (x.heuristics?.Cost ?? int.MaxValue)
-        });
-
-    // TODO: Print Available Paths
-
-    var smallestCostWay = availablePaths.MinBy(x => x.Cost);
-
-    if(smallestCostWay is null)
-    {
-        break;
-    }
-
-    // TODO: Print Chosen Path
-
-    smallestCostWay.path.PossibleEdges.Remove(smallestCostWay.nextConn);
-
-    var newPathCity = smallestCostWay.nextCity;
-
-    var newPath = new GraphRoute
-    {
-        CurrentVertex = newPathCity,
-        AccumulatedCost = smallestCostWay.Cost
-    };
-
-    newPath.PossibleEdges = dictOriginCity.Contains(newPathCity)
-        ? dictOriginCity[newPathCity]
-            .ExceptBy(smallestCostWay.path.TraveledVertexs,
-                x => x.VertexFrom,
-                StringComparer.InvariantCultureIgnoreCase)
-            .ToList()
-        : new List<GraphEdge>();
-
-    newPath.TraveledVertexs.AddRange(smallestCostWay.path.TraveledVertexs);
-    newPath.TraveledVertexs.Add(newPathCity);
-
-    routes.Add(newPath);
-
-    if(newPath.CurrentVertex == destinationCity)
-    {
-        Console.WriteLine($"Test: {newPath.CurrentVertex}");
-        break;
-    }
-
+    Console.WriteLine($"Result: {resultRoute.CurrentVertex}");
+    Console.WriteLine($"Cities: {string.Join(", ", resultRoute.TraveledVertexes) }");
 }
-
 
 // TODO: Print result
 Console.WriteLine("Execution Ended");

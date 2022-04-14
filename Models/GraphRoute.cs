@@ -4,7 +4,7 @@
     {
         public string CurrentVertex { get; set; } = string.Empty;
         public double AccumulatedCost { get; set; } = 0;
-        public List<string> TraveledVertexs { get; set; } = new();
+        public List<string> TraveledVertexes { get; set; } = new();
         public List<GraphEdge> PossibleEdges { get; set; } = new();
     }
 }
