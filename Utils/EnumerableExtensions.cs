@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IA_AEstrela.Utils
 {
-    public static class IEnumerableExtensions
+    public static class EnumerableExtensions
     {
         public static List<T>? AsList<T>(this IEnumerable<T> source)
         {

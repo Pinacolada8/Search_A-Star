@@ -6,10 +6,16 @@ namespace IA_AEstrela
 {
     public class Graph
     {
+        #region Printing
         public bool PrintEnabled { get; set; } = true;
+
+        public Function<>
+        #endregion
+
 
         #region Graph
         public readonly Dictionary<string, List<GraphEdge>> OutputEdgesByVertex;
+
 
         public Graph(IEnumerable<GraphEdge> edges)
         {
@@ -59,7 +65,7 @@ namespace IA_AEstrela
             {
                 var availableEdges = routes.SelectMany(
                     route => route.PossibleEdges
-                                  // Removes edges which the destination is a vertex that already has bee traveled too
+                                  // Removes edges which the destination is a vertex that already has already bee traveled too
                                   .ExceptBy(route.TraveledVertexes, x => x.VertexTo)
                                   .Select(x => new
                                   {
@@ -68,15 +74,49 @@ namespace IA_AEstrela
                                       fx = route.AccumulatedCost + G(x) + H(x)
                                   }));
 
+                var smallestCostPath = availableEdges.MinBy(x => x.fx);
+
                 // TODO: Print Available Paths
-                if (PrintEnabled)
+                if(PrintEnabled)
                 {
                     PrintHandler.Init()
-                                .PrintPattern("=")
+                                .BreakLine()
+                                .Print("INIT")
+                                .BreakLine()
+                                .StartTable(new TBDefinition()
+                                {
+                                    PrintHeaders = true,
+                                    ColumnDefinitions = new List<TBColumnDefinition>()
+                                    {
+                                        new()
+                                        {
+                                           WidthFraction = 10,
+                                           Header = "Route"
+                                        },
+                                        new()
+                                        {
+                                            WidthFraction = 4,
+                                            Header = "NextVertex"
+                                        },
+                                        new()
+                                        {
+                                            Header = "G(x)"
+                                        },
+                                        new()
+                                        {
+                                            Header = "H(x)"
+                                        },
+                                        new()
+                                        {
+                                            Header = "F(x)"
+                                        }
+                                    }
+                                })
+                                .PrintTable()
+                                .BreakLine()
+                                .Print("END")
                                 .BreakLine();
                 }
-
-                var smallestCostPath = availableEdges.MinBy(x => x.fx);
 
                 // breaks the loop in case its not possible to find a path for the required city
                 if(smallestCostPath is null)
