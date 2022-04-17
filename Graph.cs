@@ -9,9 +9,7 @@ namespace IA_AEstrela
         #region Printing
         public bool PrintEnabled { get; set; } = true;
 
-        public Function<>
         #endregion
-
 
         #region Graph
         public readonly Dictionary<string, List<GraphEdge>> OutputEdgesByVertex;
@@ -63,66 +61,94 @@ namespace IA_AEstrela
 
             while(true)
             {
-                var availableEdges = routes.SelectMany(
-                    route => route.PossibleEdges
-                                  // Removes edges which the destination is a vertex that already has already bee traveled too
-                                  .ExceptBy(route.TraveledVertexes, x => x.VertexTo)
-                                  .Select(x => new
-                                  {
-                                      route = route,
-                                      edge = x,
-                                      fx = route.AccumulatedCost + G(x) + H(x)
-                                  }));
+                var availableEdges
+                    = routes
+                      .SelectMany(route => route.PossibleEdges
+                                                // Removes edges which the destination is a vertex that already has already bee traveled too
+                                                .ExceptBy(route.TraveledVertexes, x => x.VertexTo)
+                                                .Select(x => new
+                                                {
+                                                    route = route,
+                                                    edge = x,
+                                                    fx = route.AccumulatedCost + G(x) + H(x)
+
+                                                }))
+                            .AsList()!;
 
                 var smallestCostPath = availableEdges.MinBy(x => x.fx);
 
                 // TODO: Print Available Paths
                 if(PrintEnabled)
                 {
-                    PrintHandler.Init()
-                                .BreakLine()
-                                .Print("INIT")
+                    var table = PrintHandler
+                                .Init()
                                 .BreakLine()
                                 .StartTable(new TBDefinition()
                                 {
                                     PrintHeaders = true,
+                                    TableForegroundColor = ConsoleColor.Yellow,
                                     ColumnDefinitions = new List<TBColumnDefinition>()
                                     {
                                         new()
                                         {
-                                           WidthFraction = 10,
-                                           Header = "Route"
+                                            WidthFraction = 12,
+                                            Header = "Route",
+                                            ColumnAlignment = TextAlignment.LEFT,
+                                            ColumnColor = ConsoleColor.DarkGray,
                                         },
                                         new()
                                         {
                                             WidthFraction = 4,
-                                            Header = "NextVertex"
+                                            Header = "NextCity",
+                                            //Header = "NextVertex",
+                                            ColumnColor = ConsoleColor.DarkGray,
                                         },
                                         new()
                                         {
-                                            Header = "G(x)"
+                                            Header = "G(x)",
+                                            ColumnColor = ConsoleColor.DarkGray
                                         },
                                         new()
                                         {
-                                            Header = "H(x)"
+                                            Header = "H(x)",
+                                            ColumnColor = ConsoleColor.DarkGray
                                         },
                                         new()
                                         {
-                                            Header = "F(x)"
+                                            Header = "F(x)",
+                                            ColumnColor = ConsoleColor.DarkGray
                                         }
                                     }
-                                })
-                                .PrintTable()
-                                .BreakLine()
-                                .Print("END")
-                                .BreakLine();
+                                });
+
+                    foreach(var availableEdge in availableEdges)
+                    {
+                        table.AddRow(string.Join("=> ", availableEdge.route.TraveledVertexes),
+                                     availableEdge.edge.VertexTo,
+                                     $"{G(availableEdge.edge)}",
+                                     $"{H(availableEdge.edge)}",
+                                     $"{availableEdge.fx}");
+
+                        if (availableEdge == smallestCostPath)
+                        {
+                            table.LastRow().Cells.FirstOrDefault()!.Value = $"*{table.LastRow().Cells.FirstOrDefault()!.Value}";
+                            foreach(var tbCell in table.LastRow().Cells.Where(x => x != null))
+                                tbCell!.Color = ConsoleColor.DarkGreen;
+                        }
+                            
+                    }
+
+                    table.PrintTable()
+                         .PrintLine("--- The next chosen route is marked with an '*' ---")
+                         .BreakLine()
+                         .BreakLine()
+                         .BreakLine();
+
                 }
 
                 // breaks the loop in case its not possible to find a path for the required city
                 if(smallestCostPath is null)
                     break;
-
-                // TODO: Print Chosen Path
 
                 smallestCostPath.route.PossibleEdges.Remove(smallestCostPath.edge);
 

@@ -103,7 +103,7 @@ public class PrintHandler
     public PrintHandler PrintPattern(string pattern)
     {
         var patternSize = pattern.Length;
-        var repetitionCount = RemainingLength / patternSize;
+        var repetitionCount = (RemainingLength / patternSize) + 1;
         var repeatedPatternText = string.Join(string.Empty,
                                               Enumerable.Range(0, repetitionCount)
                                                         .Select(x => pattern));
@@ -148,7 +148,7 @@ public class PrintHandler
 
     public PrintHandler ChangeBackgroundColor(ConsoleColor color)
     {
-        _previousBackgroundColor.Push(color);
+        _previousBackgroundColor.Push(CurrentBackgroundColor);
         CurrentBackgroundColor = color;
         return this;
     }
@@ -163,7 +163,7 @@ public class PrintHandler
 
     public PrintHandler ChangeForegroundColor(ConsoleColor color)
     {
-        _previousForegroundColor.Push(color);
+        _previousForegroundColor.Push(CurrentForegroundColor);
         CurrentForegroundColor = color;
         return this;
     }

@@ -2,6 +2,7 @@
 
 using IA_AEstrela;
 using IA_AEstrela.Models;
+using IA_AEstrela.Printing;
 using IA_AEstrela.Utils;
 
 Console.WriteLine("Execution Started");
@@ -27,8 +28,16 @@ var resultRoute = graph.SearchForRoute(initialVertex, destinationVertex);
 
 if(resultRoute is not null)
 {
-    Console.WriteLine($"Result: {resultRoute.CurrentVertex}");
-    Console.WriteLine($"Cities: {string.Join(", ", resultRoute.TraveledVertexes) }");
+    PrintHandler.Init()
+                .BreakLine()
+                .ChangeForegroundColor(ConsoleColor.Magenta)
+                .PrintPatternLine("-+-")
+                .PrintLine($"The successful route is: {string.Join(" => ", resultRoute.TraveledVertexes)}")
+                .PrintLine($"The total travel cost was: {resultRoute.AccumulatedCost}")
+                .PrintPatternLine("-+-")
+                .RevertForegroundColor()
+                .BreakLine()
+                .BreakLine();
 }
 
 // TODO: Print result

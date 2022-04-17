@@ -27,16 +27,18 @@ public class TBColumnDefinition
 
     public string Header { get; set; } = string.Empty;
     public TextAlignment HeaderAlignment { get; set; } = TextAlignment.CENTER;
-    public ConsoleColor HeaderColor { get; set; } = Console.ForegroundColor;
+    public ConsoleColor? HeaderColor { get; set; }
 }
 
 public class TBDefinition
 {
     public bool PrintHeaders { get; set; } = false;
+    public ConsoleColor HeaderColor { get; set; } = Console.ForegroundColor;
 
     public IEnumerable<TBColumnDefinition> ColumnDefinitions { get; init; } = new List<TBColumnDefinition>();
 
     public ConsoleColor TableBackgroundColor { get; set; } = Console.BackgroundColor;
+    public ConsoleColor TableForegroundColor { get; set; } = Console.ForegroundColor;
 
     public string LateralBorders { get; set; } = "||";
     public string VerticalBorders { get; set; } = "=";
@@ -56,7 +58,7 @@ public class TBCell
 
 public class TBRow
 {
-    public TBCell[] Cells { get; }
+    public TBCell?[] Cells { get; }
 
     public TBRow(int rowSize)
     {
@@ -72,7 +74,7 @@ public class TablePrinter
 
     private readonly TBDefinition _tableDefinition;
 
-    private readonly List<TBRow> _rows = new();
+    public readonly List<TBRow> Rows = new();
 
     private int _currentColumn = 0;
 
@@ -80,7 +82,7 @@ public class TablePrinter
 
     public int ColumnQty() => _tableDefinition.ColumnDefinitions.Count();
 
-    private TBRow LastRow() => _rows.Last();
+    public TBRow LastRow() => Rows.Last();
 
     #endregion
 
@@ -91,13 +93,12 @@ public class TablePrinter
 
         PrintHandler ??= PrintHandler.Init();
         _tableDefinition = tableDefinition;
-        AddRow();
     }
 
     #region Table Building
     public TablePrinter AddCell(TBCell cell, int? column = null, int? row = null)
     {
-        var rowObj = row.HasValue ? _rows[row.Value] : LastRow();
+        var rowObj = row.HasValue ? Rows[row.Value] : LastRow();
 
         if(!column.HasValue)
         {
@@ -107,16 +108,29 @@ public class TablePrinter
 
         rowObj.Cells[column.Value] = cell;
 
-        if(_currentColumn >= ColumnQty())
-            AddRow();
+        return this;
+    }
+
+    public TablePrinter AddCells(params TBCell[] cells)
+    {
+        foreach(var cell in cells)
+            AddCell(cell);
 
         return this;
     }
 
     public TablePrinter AddRow()
     {
-        _rows.Add(new TBRow(ColumnQty()));
+        Rows.Add(new TBRow(ColumnQty()));
         _currentColumn = 0;
+        return this;
+    }
+
+    public TablePrinter AddRow(params TBCell[] cells)
+    {
+        AddRow();
+        AddCells(cells);
+
         return this;
     }
 
@@ -125,25 +139,35 @@ public class TablePrinter
     #region Printing
     public PrintHandler PrintTable()
     {
-        PrintHandler.BreakLine(ifNotNewLine: true);
+        PrintHandler.BreakLine(ifNotNewLine: true)
+                    .ChangeBackgroundColor(_tableDefinition.TableBackgroundColor)
+                    .ChangeForegroundColor(_tableDefinition.TableForegroundColor);
 
         var extraLength = CalculateColumnWidths();
 
         PrintVerticalBorder();
-        PrintHandler.ChangeBackgroundColor(_tableDefinition.TableBackgroundColor)
-                    .AddLineStart(_tableDefinition.LateralBorders.PadLeft(extraLength     / 2))
+        PrintHandler.AddLineStart(_tableDefinition.LateralBorders.PadLeft(extraLength / 2))
                     .AddLineEnd(_tableDefinition.LateralBorders.PadRight(extraLength / 2, ' '));
-        
+
         if(_tableDefinition.PrintHeaders)
             PrintHeaders();
 
-        foreach (var row in _rows)
+        var isFirstRow = true;
+        foreach(var row in Rows)
+        {
+            if(!isFirstRow)
+                PrintHandler.PrintPatternLine(_tableDefinition.LineSeparator);
+
+            isFirstRow = false;
+
             PrintRow(row);
+        }
 
         PrintHandler.RevertLineStart()
-                    .RevertLineEnd()
-                    .RevertBackgroundColor();
+                    .RevertLineEnd();
         PrintVerticalBorder();
+        PrintHandler.RevertForegroundColor()
+                    .RevertBackgroundColor();
 
         return PrintHandler;
     }
@@ -180,7 +204,8 @@ public class TablePrinter
 
             firstColumn = false;
 
-            PrintHandler.ChangeForegroundColor(column.HeaderColor)
+            PrintHandler.Print("")
+                        .ChangeForegroundColor(column.HeaderColor ?? _tableDefinition.HeaderColor)
                         .Print(column.Header.ToFixedLength(column.CalculatedWidth, column.HeaderAlignment))
                         .RevertForegroundColor();
         }
@@ -193,9 +218,7 @@ public class TablePrinter
         var columns = _tableDefinition.ColumnDefinitions.AsList()!;
         var firstColumn = true;
 
-        PrintHandler.BreakLine(ifNotNewLine: true);
-
-        for (var i = 0; i < columns.Count(); i++)
+        for(var i = 0; i < columns.Count(); i++)
         {
             if(!firstColumn)
                 PrintHandler.Print(_tableDefinition.ColumnSeparator);
@@ -203,14 +226,17 @@ public class TablePrinter
             firstColumn = false;
 
             var column = columns[i];
-            var cell = row.Cells[i];
+            var cell = row.Cells[i] ?? new TBCell();
 
             var color = cell.Color ?? column.ColumnColor;
             var alignment = cell.Alignment ?? column.ColumnAlignment;
-            PrintHandler.ChangeForegroundColor(color)
+            PrintHandler.Print("")
+                        .ChangeForegroundColor(color)
                         .Print(cell.Value.ToFixedLength(column.CalculatedWidth, alignment))
                         .RevertForegroundColor();
         }
+
+        PrintHandler.BreakLine();
     }
     #endregion
 
