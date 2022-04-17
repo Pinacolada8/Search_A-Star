@@ -14,7 +14,7 @@ public class PrintHandler
     public string CurrentLineEnd { get; private set; } = string.Empty;
     private readonly Stack<string> _previousLineEnd = new();
 
-    public int MaxWidth => Console.WindowWidth;
+    public int MaxWidth => Console.WindowWidth - 1;
 
     public int CurrentPos { get; private set; } = 0;
 
