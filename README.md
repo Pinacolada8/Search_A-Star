@@ -3,13 +3,12 @@
 **Description**:  Base code for creating automaton interpreters.
 
 
-  - Developed in C# .Net Core 3.1
+  - Developed in C# .Net Core 6
   - Cross Platform (Windows, Linux, MacOS)
-  - **Status**:  Currently the project only contains code for a deterministic stack automaton.
 
 ## Dependencies
 
-  - .Net Core 3.1 [Download1](https://dotnet.microsoft.com/download) [Download2](https://github.com/dotnet/core/blob/master/release-notes/3.1/3.1.8/3.1.402-download.md)
+  - .Net Core 6
 
 ## Installation
 
