@@ -12,10 +12,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Files\Grafo.txt">
+    <None Update="Files\Grafo_Cidades_Arad.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Files\Heuristica.txt">
+    <None Update="Files\Grafo_Prova01.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\Heuristica_Prova01.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\Heuristica_Cidades_Arad.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

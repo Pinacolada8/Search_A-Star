@@ -99,8 +99,7 @@ namespace IA_AEstrela
                                         new()
                                         {
                                             WidthFraction = 4,
-                                            Header = "NextCity",
-                                            //Header = "NextVertex",
+                                            Header = "NextVertex",
                                             ColumnColor = ConsoleColor.DarkGray,
                                         },
                                         new()
@@ -125,7 +124,7 @@ namespace IA_AEstrela
                     {
                         table.AddRow(string.Join("=> ", availableEdge.route.TraveledVertexes),
                                      availableEdge.edge.VertexTo,
-                                     $"{G(availableEdge.edge)}",
+                                     $"{G(availableEdge.edge) + availableEdge.route.AccumulatedCost}",
                                      $"{H(availableEdge.edge)}",
                                      $"{availableEdge.fx}");
 

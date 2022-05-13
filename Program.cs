@@ -7,12 +7,12 @@ using IA_AEstrela.Utils;
 
 Console.WriteLine("Execution Started");
 
-const string initialVertex = "Arad";
-const string destinationVertex = "Bucareste";
+const string initialVertex = "A";
+const string destinationVertex = "R";
 
 
-var graphEdges = GraphReader.ReadEdges("files/Grafo.txt").AsList() ?? new List<GraphEdge>();
-var graphHeuristics = GraphReader.ReadHeuristics("files/Heuristica.txt").AsList() ?? new List<GraphHeuristic>();
+var graphEdges = GraphReader.ReadEdges("files/Grafo_Prova01.txt").AsList() ?? new List<GraphEdge>();
+var graphHeuristics = GraphReader.ReadHeuristics("files/Heuristica_Prova01.txt").AsList() ?? new List<GraphHeuristic>();
 
 // ReSharper disable once UseObjectOrCollectionInitializer
 var graph = new Graph(graphEdges);
