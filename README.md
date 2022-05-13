@@ -1,7 +1,6 @@
-# Automaton Interpreter
+# A* Search algorithm
 
 **Description**:  Base code for creating automaton interpreters.
-
 
   - Developed in C# .Net Core 6
   - Cross Platform (Windows, Linux, MacOS)
